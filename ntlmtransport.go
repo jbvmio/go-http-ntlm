@@ -15,6 +15,7 @@ import (
 
 // NtlmTransport is implementation of http.RoundTripper interface
 type NtlmTransport struct {
+	HTTPClient      *http.Client
 	TLSClientConfig *tls.Config
 	Domain          string
 	User            string
@@ -26,22 +27,23 @@ func (t NtlmTransport) RoundTrip(req *http.Request) (res *http.Response, err err
 	// first send NTLM Negotiate header
 	r, _ := http.NewRequest("GET", req.URL.String(), strings.NewReader(""))
 	r.Header.Add("Authorization", "NTLM "+encBase64(negotiate()))
+	if t.HTTPClient == nil {
+		t.HTTPClient = &http.Client{Transport: &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			DialContext: (&net.Dialer{
+				Timeout:   30 * time.Second,
+				KeepAlive: 30 * time.Second,
+				DualStack: true,
+			}).DialContext,
+			MaxIdleConns:          100,
+			IdleConnTimeout:       90 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+			TLSClientConfig:       t.TLSClientConfig,
+		}}
+	}
 
-	client := http.Client{Transport: &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-			DualStack: true,
-		}).DialContext,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-		TLSClientConfig:       t.TLSClientConfig,
-	}}
-
-	resp, err := client.Do(r)
+	resp, err := t.HTTPClient.Do(r)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +98,7 @@ func (t NtlmTransport) RoundTrip(req *http.Request) (res *http.Response, err err
 
 		// set NTLM Authorization header
 		req.Header.Set("Authorization", "NTLM "+encBase64(authenticate.Bytes()))
-		return client.Do(req)
+		return t.HTTPClient.Do(req)
 	}
 
 	return resp, err
