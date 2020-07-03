@@ -1,0 +1,4 @@
+github.com/jbvmio/ntlm v1.0.0 h1:2ek17zT2hg45c4ckMTBoiwYA2mxKry9pxLo3h7vtsck=
+github.com/jbvmio/ntlm v1.0.0/go.mod h1:SNjbvT/9ZaW2foNWh2O/lULgjfxSnLAxdWQTJ1RQ5JA=
+github.com/jbvmio/ntlm/md4 v1.0.0 h1:jHskLrKfNCUPrrnQJoWr4H9YoFKj1tbmNv4wY2U8F+g=
+github.com/jbvmio/ntlm/md4 v1.0.0/go.mod h1:cKeM45a04Sc/SMvwph0pt9dO3wfoefErq2674ucDBWo=

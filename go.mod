@@ -1,3 +1,5 @@
 module github.com/jbvmio/go-http-ntlm
 
-replace github.com/jbvmio/go-ntlm => ./
+go 1.12
+
+require github.com/jbvmio/ntlm v1.0.0
